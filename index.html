@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Game</title>
+  <title>Memory Game - Multi Level</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
     h1 { margin: 20px 0; }
     .stats { margin: 10px 0; font-size: 1.2rem; }
-    .game-board { display: grid; grid-template-columns: repeat(4, 100px); grid-gap: 15px; justify-content: center; margin-top: 20px; }
+    .controls { margin: 15px 0; }
+    .game-board { display: grid; grid-gap: 15px; justify-content: center; margin-top: 20px; }
     .card { width: 100px; height: 100px; perspective: 1000px; cursor: pointer; }
     .card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; }
     .card.flipped .card-inner { transform: rotateY(180deg); }
@@ -23,7 +24,15 @@
   <div class="stats">
     Moves: <span id="moves">0</span> | Time: <span id="time">0</span>s
   </div>
-  <button id="restart">Restart Game</button>
+  <div class="controls">
+    <label for="level">Choose Level: </label>
+    <select id="level">
+      <option value="easy">Easy (2x2)</option>
+      <option value="medium" selected>Medium (4x4)</option>
+      <option value="hard">Hard (6x6)</option>
+    </select>
+    <button id="restart">Restart Game</button>
+  </div>
   <div class="game-board" id="gameBoard"></div>
   <div class="win-message" id="winMessage"></div>
 
@@ -33,9 +42,10 @@
     const movesDisplay = document.getElementById("moves");
     const timeDisplay = document.getElementById("time");
     const winMessage = document.getElementById("winMessage");
+    const levelSelect = document.getElementById("level");
 
-    const emojis = ["🍎","🍌","🍇","🍓","🍒","🍍","🥝","🍉"];
-    let cards = [...emojis, ...emojis];
+    const emojis = ["🍎","🍌","🍇","🍓","🍒","🍍","🥝","🍉","🍋","🥥","🍑","🍐","🥭","🍈","🍏","🍔","🍕","🍟"];
+    let cards = [];
     let flippedCards = [];
     let matchedCount = 0;
     let moves = 0;
@@ -61,7 +71,22 @@
       flippedCards = [];
       moves = 0;
       movesDisplay.textContent = moves;
-      shuffle(cards).forEach(emoji => {
+
+      let level = levelSelect.value;
+      let gridSize, pairsNeeded;
+
+      if (level === "easy") {
+        gridSize = 2; pairsNeeded = 2;
+      } else if (level === "medium") {
+        gridSize = 4; pairsNeeded = 8;
+      } else {
+        gridSize = 6; pairsNeeded = 18;
+      }
+
+      gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 100px)`;
+      cards = shuffle([...emojis.slice(0, pairsNeeded), ...emojis.slice(0, pairsNeeded)]);
+
+      cards.forEach(emoji => {
         const card = document.createElement("div");
         card.classList.add("card");
         card.dataset.value = emoji;
@@ -74,6 +99,7 @@
         card.addEventListener("click", () => flipCard(card));
         gameBoard.appendChild(card);
       });
+
       startTimer();
     }
 
@@ -108,6 +134,8 @@
     }
 
     restartBtn.addEventListener("click", createBoard);
+    levelSelect.addEventListener("change", createBoard);
+
     createBoard();
   </script>
 </body>
